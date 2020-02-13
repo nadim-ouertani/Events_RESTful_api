@@ -16,6 +16,16 @@ exports.checkID = (req, res, next, val) => { //Check if ID is valid
     next();
 };
 
+exports.checkBody = (req, res, next) => {
+    if (!req.body.name || !req.body.price) {
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Missing name or price'
+        });
+    }
+    next();
+};
+
 exports.getAllEvents = (req, res) => {
     console.log(req.requestTime); //Get the request time
 
@@ -45,7 +55,7 @@ exports.createEvent = (req, res) => { //Create event
     const newID = events[events.length - 1].id + 1;
     const newEvent = Object.assign({ id: newID }, req.body);
     events.push(newEvent);
-    fs.writeFile(`${__dirname}/data/event-simple.json`, JSON.stringify(events), err => {
+    fs.writeFile(`${__dirname}/../data/event-simple.json`, JSON.stringify(events), err => {
         res.status(201).json({
             status: 'success',
             data: {

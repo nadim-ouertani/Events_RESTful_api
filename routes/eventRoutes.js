@@ -9,7 +9,7 @@ router.param('id', eventController.checkID);
 router
     .route('/')
     .get(eventController.getAllEvents)
-    .post(eventController.createEvent);
+    .post(eventController.checkBody, eventController.createEvent);
 
 router
     .route('/:id')
