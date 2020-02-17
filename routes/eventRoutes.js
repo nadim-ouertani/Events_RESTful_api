@@ -4,7 +4,7 @@ const eventController = require('./../controllers/eventController');
 
 const router = express.Router();
 
-router.param('id', eventController.checkID);
+// router.param('id', eventController.checkID);
 
 router
   .route('/')
