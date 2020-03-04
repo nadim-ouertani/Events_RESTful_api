@@ -9,11 +9,12 @@ const router = express.Router();
 router
   .route('/')
   .get(eventController.getAllEvents)
-  .post(eventController.checkBody, eventController.createEvent);
+  .post(eventController.createEvent);
 
 router
   .route('/:id')
   .get(eventController.getEvent)
-  .patch(eventController.updateEvent);
+  .patch(eventController.updateEvent)
+  .delete(eventController.deleteEvent);
 
 module.exports = router;
