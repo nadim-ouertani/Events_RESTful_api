@@ -7,6 +7,12 @@ const router = express.Router();
 // router.param('id', eventController.checkID);
 
 router
+  .route('/top-5-cheap')
+  .get(eventController.aliasTopEvents, eventController.getAllEvents);
+
+router.route('/event-stats').get(eventController.getEventStats);
+
+router
   .route('/')
   .get(eventController.getAllEvents)
   .post(eventController.createEvent);

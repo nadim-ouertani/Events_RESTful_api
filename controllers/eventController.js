@@ -1,9 +1,26 @@
 const Event = require('./../models/eventModel');
+const APIFeatures = require('./../utils/apiFeatures');
 
+//GET WITH ALIASING
+exports.aliasTopEvents = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
+
+// GET ALL EVENT WITH FILTRING
 exports.getAllEvents = async (req, res) => {
   try {
-    const events = await Event.find();
+    // EXECUTE QUERY
+    const features = new APIFeatures(Event.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    const events = await features.query;
 
+    // SEND RESPONSE
     res.status(200).json({
       status: 'success',
       result: events.length,
@@ -18,7 +35,8 @@ exports.getAllEvents = async (req, res) => {
     });
   }
 };
-//Get an event
+
+// GET AN EVENT
 exports.getEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -37,7 +55,8 @@ exports.getEvent = async (req, res) => {
     });
   }
 };
-//Create event
+
+// CREATE AN EVENT
 exports.createEvent = async (req, res) => {
   try {
     // const newEvent = new Event({})
@@ -58,6 +77,7 @@ exports.createEvent = async (req, res) => {
   }
 };
 
+// UPDATE AN EVENT
 exports.updateEvent = async (req, res) => {
   try {
     const event = await Event.findByIdAndUpdate(req.params.id, req.body, {
@@ -79,6 +99,7 @@ exports.updateEvent = async (req, res) => {
   }
 };
 
+// DELETE AN EVENT
 exports.deleteEvent = async (req, res) => {
   try {
     await Event.findByIdAndDelete(req.params.id, req.body);
@@ -89,7 +110,46 @@ exports.deleteEvent = async (req, res) => {
     });
   } catch (err) {
     res.status(404).json({
-      status: 'failt',
+      status: 'fail',
+      message: err
+    });
+  }
+};
+
+exports.getEventStats = async (req, res) => {
+  try {
+    const stats = await Event.aggregate([
+      {
+        $match: { ratingsAverage: { $gte: 4.5 } }
+      },
+      {
+        $group: {
+          _id: { $toUpper: '$difficulty' },
+          numEvents: { $sum: 1 },
+          numRatings: { $sum: '$ratingsQuantity' },
+          avgRating: { $avg: '$ratingsAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' }
+        }
+      },
+      {
+        $sort: { avgPrice: 1 }
+      },
+      // {
+      //   $match: { _id: { $ne: 'EASY' } }
+      // }
+    ]);
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        stats
+      }
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
       message: err
     });
   }
